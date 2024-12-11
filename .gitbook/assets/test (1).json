@@ -1,0 +1,200 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Ryng Campaign API",
+      "description": "API for managing campaigns in Ryng",
+      "version": "1.0.0"
+    },
+    "servers": [
+      {
+        "url": "https://tenant.ryng.xyz/rest-api/v1"
+      }
+    ],
+    "paths": {
+      "/campaign": {
+        "post": {
+          "summary": "Create a new campaign",
+          "requestBody": {
+            "required": true,
+            "parameters": [
+                { "name": "api_key", "in": "header", "description": "", "required": false, "schema": { "type": "string" } },
+                { "name": "petId", "in": "path", "description": "Pet id to delete", "required": true, "schema": { "type": "integer", "format": "int64" } }
+            ],
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "Name of the campaign"
+                    },
+                    "agentMapping": {
+                      "type": "string",
+                      "enum": ["global", "inline", "all-agents"],
+                      "description": "Strategy for agent mapping"
+                    },
+                    "agents": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "List of agent emails"
+                    },
+                    "customFieldNames": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      },
+                      "description": "Mapping of custom field names"
+                    },
+                    "customerData": {
+                      "type": "object",
+                      "properties": {
+                        "terminalCallbackUrl": {
+                          "type": "string",
+                          "format": "uri",
+                          "description": "URL for terminal callback"
+                        },
+                        "connectCallbackUrl": {
+                          "type": "string",
+                          "format": "uri",
+                          "description": "URL for connect callback"
+                        },
+                        "jsonData": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "number": {
+                                "type": "string",
+                                "description": "Customer phone number"
+                              },
+                              "agentsAssigned": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                },
+                                "description": "List of agents assigned to the customer"
+                              },
+                              "customField1": {
+                                "type": "string",
+                                "description": "Value for custom field 1"
+                              }
+                            }
+                          },
+                          "description": "Customer data in JSON format"
+                        }
+                      },
+                      "required": [
+                        "terminalCallbackUrl",
+                        "connectCallbackUrl",
+                        "jsonData"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "agentMapping",
+                    "agents",
+                    "customFieldNames",
+                    "customerData"
+                  ]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successfully created the campaign",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string",
+                        "example": "Campaign created successfully."
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Forbidden - Access Denied",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string",
+                        "example": "Access denied. Please check your permissions."
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Internal Server Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string",
+                        "example": "Internal server error occurred."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "apiKeyAuth": []
+            }
+          ],
+          "callbacks": {
+            "NoAccessKeyHeader": {
+              "summary": "Error response when x-access-key header is not provided",
+              "description": "Error response when the required 'x-access-key' header is missing in the request.",
+              "responses": {
+                "401": {
+                  "description": "Unauthorized",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "example": "Access denied. Missing x-access-key header."
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "petstore_auth": ["write:pets", "read:pets"] }]
+      }
+    },
+    "components": {
+        "securitySchemes": {
+			"petstore_auth": {
+				"type": "oauth2",
+				"flows": { "implicit": { "authorizationUrl": "https://petstore3.swagger.io/oauth/authorize", "scopes": { "write:pets": "modify pets in your account", "read:pets": "read your pets" } } }
+			},
+			"api_key": { "type": "apiKey", "name": "api_key", "in": "header" }
+		}
+    }
+  }
+  
